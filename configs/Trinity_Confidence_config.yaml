@@ -1,0 +1,57 @@
+model_params:
+  name: 'ResNet34'
+  net_type: 'resnet'
+  pretrained_model_path: './pre_trained/resnet_cifar10.pth'
+  transform_params: 
+    mean: [0.4914, 0.4822, 0.4465]
+    std: [0.2023, 0.1994, 0.2010]
+  out_dist_list: ['svhn', 'imagenet_resize', 'lsun_resize'] #, 'subset_cifar100']
+  #out_dist_list: ['svhn']
+  out_idx: [6, 14, 68, 71] # these are the ids of bee, butterfly, road and sea res. in CIFAR100, not req for other datasets
+  num_ood_samples: 2000 # subset_cifar100 - a total of 2000 samples ..
+
+exp_params:
+  dataset: 'cifar10'
+  dataroot: './data'
+  num_classes: 10
+  input_dim: [3, 32, 32]
+  feature_layers: [4] # [4,3,2,1]
+  knn_args: 
+    k: 5 #[5, 10]
+    knn_type: 'annoy'
+    keep_original: True 
+    keep_knn_mean: False
+    keep_knn_std: True
+  odin_args:
+    settings: [[1,0],[10,0],[10,.005]] #list of [temperature,noise] =>baseline,temp-scaling,odin
+  lid_args:
+    adv_type: 'FGSM'
+    outf: './output/'
+  noise_params:
+    m_list: [0.0]
+    gradient_params: [0.2023, 0.1994, 0.2010]
+  regressor_features: ['mahalanobis_class_cov', 'mahalanobis_tied_cov', 'pca', 'knn_mahalanobis_class_cov'] #, 'knn_mahalanobis_tied_cov']  
+  #regressor_features: ['mahalanobis_tied_cov']  # assuming either knn_tied or knn_class will be true and not both
+
+tsne_params:
+  n_components: 2
+  verbose: 1
+  perplexity: 40
+  n_iter: 800
+  random_state: 340
+  # class_list: ['Class 1', 'Class 2', 'Class 3', 'Class 4', 'Class 5', 'Class 6', 'Class 7', 'Class 8', 'Class 9', 'Class 10', 'Class 11']
+  # color_list: ['b', 'g', 'r', 'c', 'm', 'y', 'tab:brown', 'tab:gray', 'tab:orange', 'tab:pink', 'tab:purple']
+  class_list: ['Class 1', 'Class 2', 'Class 3', 'Class 4', 'Class 5', 'Class 6', 'Class 7', 'Class 8', 'Class 9', 'Class 10', 'Class 11']
+  color_list: ['b', 'g', 'r', 'c', 'm', 'y', 'tab:brown', 'tab:gray', 'tab:orange', 'tab:pink', 'k']
+  # feature_file_list: ['analyze-results/penultimate_features_in_dist_train.npz', 'analyze-results/penultimate_features_out_dist_train.npz']
+  feature_file_list: ['in-dist-penul-features.npz', 'most_outlier_features.npz']
+  plot_file_name: 'test-800-itr-in-out-TSNE'
+
+trainer_params:
+  gpu: 0
+  batch_size: 100
+
+logging_params:
+  outf: './output/resnet_cifar10/'
+  in_features_file_list: ['test.npz']
+
