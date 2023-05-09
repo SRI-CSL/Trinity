@@ -26,12 +26,19 @@ data_directory = "/WorkSpace-2/aroy/data/datasets/coco/coco_2017"
 image_directory = os.path.join(data_directory, "images/train2017")
 annotation_file = os.path.join(data_directory, "annotations-json/instances_train2017.json")
 
+# override 2017 to 2014 data
+image_directory = "/WorkSpace-2/aroy/data/ datasets/coco/val2014"
+annotation_file = "/WorkSpace-2/aroy/data/datasets/coco/annotations/instances_val2014.json"
+
 ooc_directory = "/WorkSpace-2/aroy/data/OOC/COCO_OOC/coco_ooc_dataset/"
 ooc_image_directory = os.path.join(ooc_directory, "images")
 ooc_ann_directory = os.path.join(ooc_directory, "annotations")
 
 coco_output_directory = "/WorkSpace-2/jha/data/coco_2017_SD2_infilled"
 ooc_output_directory = "/WorkSpace-2/jha/data/ooc_coco_2017_SD2_infilled"
+
+# override output to 2014 now .. 
+ooc_output_directory = "/WorkSpace-2/jha/data/ooc_coco_2014_SD2_infilled"
 
 ########################################################################################################
 ## generic helper and test methods
