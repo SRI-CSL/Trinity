@@ -37,8 +37,8 @@ for indx in range(start_indx, end_indx):
         content_str = "\"" + caption + "\"" + query_string
         print (content_str)
         completion = openai.ChatCompletion.create(
-          # model="gpt-3.5-turbo",
-          model="gpt-4",
+          model="gpt-3.5-turbo",
+          #model="gpt-4",
           messages=[{"role": "user", "content": content_str}],
           max_tokens=1000
         )
