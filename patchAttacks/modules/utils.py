@@ -4,15 +4,20 @@ import numpy as np
 import cv2
 from segment_anything import SamAutomaticMaskGenerator, SamPredictor, sam_model_registry
 import copy
+from collections import namedtuple
+import matplotlib.pyplot as plt
 
 
-def LoadApricotDataset(datasetPath = "/project/trinity/datasets/apricot/pub/apricot-mask/dev/data_mask_v2/", batchsize=32, shape=None):
+def LoadApricotDataset(datasetPath = "/project/trinity/datasets/apricot/pub/apricot-mask/dev/data_mask_v2/", batchsize=32, numImages=None, shape=None):
     images_folder = datasetPath
     images_names = os.listdir(images_folder)
 
     imgs = []
     img_masks = []
-    for i in range(len(images_names)):
+
+    if numImages is None:
+        numImages = len(images_names)
+    for i in range(numImages):
         # idx = random.randint(0,len(gt_images_names)-1)
         img_info = torch.load(os.path.join(images_folder, images_names[i]))
         img = np.squeeze(img_info['Image'])
@@ -72,6 +77,25 @@ def ConvertMaskToRectMask(maskList):
         rect_mask.append(mask)
     return rect_mask
 
+
+def VisualizeOutputs(imgsList, patchList, inpaintedList):
+    for i in range(len(inpaintedList)):
+        fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(12, 20))
+        axes[0].imshow(imgsList[i])
+        axes[0].axis('off')
+        axes[0].set_title('Original Image')
+
+        axes[1].imshow(patchList[i])
+        axes[1].axis('off')
+        axes[1].set_title('Detected Patch Mask')
+
+        axes[2].imshow(inpaintedList[i])
+        axes[2].axis('off')
+        axes[2].set_title('Repainted Image')
+    
+    plt.tight_layout()
+    plt.show()
+    plt.close()
 
 def ConvertToTensorList(npList):
     tensor_list = []
