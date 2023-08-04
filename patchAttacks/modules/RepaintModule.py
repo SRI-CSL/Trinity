@@ -3,7 +3,7 @@ from diffusers import StableDiffusionInpaintPipeline
 
 def InitSD2():
     pipe = StableDiffusionInpaintPipeline.from_pretrained("stabilityai/stable-diffusion-2-inpainting", torch_dtype=torch.float16)
-    pipe.to("cuda:2")
+    pipe.to("cuda:0")
     return pipe
 
 def getRepaintedImages(imgs, masks, sd2Model):

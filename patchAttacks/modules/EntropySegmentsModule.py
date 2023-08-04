@@ -3,16 +3,16 @@ import numpy as np
 import scipy
 
 
-def GetDCTSingleSegment(maskedImage):
+def GetEntropySingleSegment(maskedImage):
     # mask_3d = np.repeat(mask[:, :, np.newaxis], 3, axis=2)
     # masked_img = image * mask_3d
     gray_scale = cv2.cvtColor(maskedImage, cv2.COLOR_BGR2GRAY)
-    dct = scipy.fftpack.dct( scipy.fftpack.dct(gray_scale, axis=0, norm='ortho' ), axis=1, norm='ortho' )
-    magnitude_spectrum = np.log1p(np.abs(dct))
+    dct = scipy.entropy( scipy.entropy(gray_scale, axis=0, norm='ortho' ), axis=1, norm='ortho' )
+    magnitude_spectrum = np.log1p(dct)
     return magnitude_spectrum
 
 
-# def GetDCTAllSegments(imgs, imgMasks, SAMModel, maximumSegments=20):
+# def GetEntropyAllSegments(imgs, imgMasks, SAMModel, maximumSegments=20):
 #     DCTSegment = namedtuple('DCTSegment', ['image', 'segments', 'dcts'])
 
 #     dct_segment_list = []
@@ -34,13 +34,13 @@ def GetDCTSingleSegment(maskedImage):
 #         for j in range(min(len(masks), maximumSegments)):
 #             if j != patch_mask_idx:
 #                 current_mask = masks[j]['segmentation']
-#                 masked_img, dct = GetDCTSingleSegment(imgs[i], current_mask)
+#                 masked_img, dct = GetEntropySingleSegment(imgs[i], current_mask)
 #                 dct_list.append(dct)
 #                 masked_img_list.append(masked_img)
 
 #         # Patch
 #         patch_mask = masks[patch_mask_idx]['segmentation']
-#         masked_img, dct = GetDCTSingleSegment(imgs[i], patch_mask)
+#         masked_img, dct = GetEntropySingleSegment(imgs[i], patch_mask)
 #         dct_list.append(dct)
 #         masked_img_list.append(masked_img)
 
