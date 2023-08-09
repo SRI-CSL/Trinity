@@ -6,9 +6,35 @@ from segment_anything import SamAutomaticMaskGenerator, SamPredictor, sam_model_
 import copy
 from collections import namedtuple
 import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import json
 
 
-def LoadApricotDataset(datasetPath = "/project/trinity/datasets/apricot/pub/apricot-mask/dev/data_mask_v2/", batchsize=32, numImages=None, shape=None):
+def LoadImages(folderPath, batchsize=32, numImages=None, shape=None, scale=1.0):
+    images_names = os.listdir(folderPath)
+    imgs_list = []
+
+    if numImages is None:
+        numImages = len(images_names)
+    for i in range(numImages):
+        img = cv2.imread(os.path.join(folderPath, images_names[i]))
+        h, w, _ = img.shape
+        if shape is None:
+            shape = (int(w * scale), int(h * scale))
+        img = cv2.resize(img, shape, interpolation = cv2.INTER_AREA)
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
+        imgs_list.append(img)
+
+        if len(imgs_list) == batchsize:
+            yield imgs_list
+            imgs_list.clear()
+
+    if len(imgs_list) > 0:
+        yield imgs_list
+
+
+def LoadApricotDataset(datasetPath = "/project/trinity/datasets/apricot/pub/apricot-mask/dev/data_mask_v2/", batchsize=32, numImages=None, shape=None, scale=1.0):
     images_folder = datasetPath
     images_names = os.listdir(images_folder)
 
@@ -23,8 +49,9 @@ def LoadApricotDataset(datasetPath = "/project/trinity/datasets/apricot/pub/apri
         img = np.squeeze(img_info['Image'])
         img = np.uint8(img * 255.0)
 
-        if shape is not None:
-            img = cv2.resize(img, shape, interpolation = cv2.INTER_AREA)
+        if shape is None:
+            shape = (int(img.shape[1] * scale), int(img.shape[0] * scale))
+        img = cv2.resize(img, shape, interpolation = cv2.INTER_AREA)
         imgs.append(img)
 
         img_mask = np.squeeze(img_info['Mask'])
@@ -78,7 +105,7 @@ def ConvertMaskToRectMask(maskList):
     return rect_mask
 
 
-def VisualizeOutputs(imgsList, patchList, inpaintedList):
+def VisualizeInpaintedOutputs(imgsList, patchList, inpaintedList):
     for i in range(len(inpaintedList)):
         fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(12, 20))
         axes[0].imshow(imgsList[i])
@@ -97,12 +124,79 @@ def VisualizeOutputs(imgsList, patchList, inpaintedList):
     plt.show()
     plt.close()
 
+  
+def VisualizeBboxes(imgsList, bboxList, labelsList, scoresList=None, labelsMapping=None, scoreThreshold = 0.3, numImagesToShow=5, numCols=3):
+    images_displayed = 0
+    if len(imgsList) < numImagesToShow:
+        numImagesToShow = len(imgsList)
+    
+    while(images_displayed < numImagesToShow):
+        num_images_current_row = min(numCols, numImagesToShow - images_displayed)
+        fig, axes = plt.subplots(1, num_images_current_row, figsize=(3*num_images_current_row, 20))
+
+        for j in range(num_images_current_row):
+            if num_images_current_row == 1:
+                axes.imshow(imgsList[images_displayed])
+                axes.axis('off')
+            else:  
+                axes[j].imshow(imgsList[images_displayed])
+                axes[j].axis('off')
+
+            if scoresList is None:
+                scores = [1.0 for i in range(bboxList[images_displayed].shape[0])]
+            else:
+                scores = scoresList[images_displayed]
+
+            for k in range(bboxList[images_displayed].shape[0]):
+                
+                if scores[k] > scoreThreshold:
+                    rectangle = patches.Rectangle((bboxList[images_displayed][k][0], bboxList[images_displayed][k][1]), bboxList[images_displayed][k][2], bboxList[images_displayed][k][3],linewidth=1, edgecolor='r', facecolor='none')
+                    
+                    if labelsMapping is None:
+                        label = str(int(labelsList[images_displayed][k]))
+                    else:
+                        label = labelsMapping[int(labelsList[images_displayed][k])]
+
+                    if num_images_current_row == 1:
+                        axes.add_patch(rectangle)
+                        axes.text(bboxList[images_displayed][k][0], bboxList[images_displayed][k][1], "{}:{:.3f}".format(label, scores[k]), fontsize=8, bbox=dict(facecolor='black', alpha=0.8, pad=1), color='white')
+                    else:
+                        axes[j].add_patch(rectangle)
+                        axes[j].text(bboxList[images_displayed][k][0], bboxList[images_displayed][k][1], "{}:{:.3f}".format(label, scores[k]), fontsize=8, bbox=dict(facecolor='black', alpha=0.8, pad=1), color='white')
+        
+            images_displayed += 1
+        plt.show()
+        plt.close()
+
+
+def GetLabelsFromIndices(labelsFile):
+    indices_to_labels = []
+    with open(labelsFile, "r") as file:
+        for line in file:
+            indices_to_labels.append(line.strip())
+    return indices_to_labels
+
+
+def GetApricotAnnotations(apricotAnnotationPath):
+    annotations_file = apricotAnnotationPath
+    with open(annotations_file, 'r') as file:
+        data = json.load(file)
+
+    annotations_coco_91 = {}
+
+    for i in range(len(data['categories'])):
+        annotations_coco_91[data['categories'][i]['id']] = data['categories'][i]['name']
+
+    return annotations_coco_91
+
+
 def ConvertToTensorList(npList):
     tensor_list = []
     for i in range(len(npList)):
         img = np.transpose(np.array(npList[i]), (2,0,1))
         img = torch.from_numpy(img.astype(np.float32))
         img /= 255.0
+        tensor_list.append(img)
     return tensor_list
 
 
