@@ -41,7 +41,7 @@ def LoadApricotDataset(datasetPath = "/project/trinity/datasets/apricot/pub/apri
     imgs = []
     img_masks = []
 
-    if numImages is None:
+    if numImages is None or numImages > len(images_names):
         numImages = len(images_names)
     for i in range(numImages):
         # idx = random.randint(0,len(gt_images_names)-1)
@@ -167,6 +167,34 @@ def VisualizeBboxes(imgsList, bboxList, labelsList, scoresList=None, labelsMappi
             images_displayed += 1
         plt.show()
         plt.close()
+
+
+def SaveSingleFeature(folder, imgNumber, feature, featureName):
+    folder_clean = os.path.join(folder, featureName)
+    folder_patch = os.path.join(folder, featureName + "_patch")
+
+    if not os.path.exists(folder_clean):
+        os.makedirs(folder_clean)
+    if not os.path.exists(folder_patch):
+        os.makedirs(folder_patch)
+    
+    filename_patch = "{}_{}.png".format(imgNumber, featureName)
+
+    for i in range(feature.shape[-1]):
+        if i == feature.shape[-1] - 1:
+            cv2.imwrite(os.path.join(folder_patch, filename_patch), feature[:,:,i])
+            continue
+        filename = "{}_{}_{}.png".format(imgNumber, featureName, i)
+        cv2.imwrite(os.path.join(folder_clean, filename), feature[:,:,i])
+
+
+def SaveFeatures(folder, imgNumber, dctList, fftList, entropyList):
+    if dctList.shape[0] != 0:
+        SaveSingleFeature(folder, imgNumber, dctList, "dct")
+    if fftList.shape[0] != 0:
+        SaveSingleFeature(folder, imgNumber, fftList, "fft")
+    if entropyList.shape[0] != 0:
+        SaveSingleFeature(folder, imgNumber, entropyList, "entropy")
 
 
 def GetLabelsFromIndices(labelsFile):

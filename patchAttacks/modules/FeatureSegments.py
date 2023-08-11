@@ -1,5 +1,4 @@
 from collections import namedtuple
-import cv2
 import numpy as np
 
 from . import utils
@@ -10,7 +9,7 @@ from . import EntropySegmentsModule
 
 def GetSegments(imgs, imgMasks, samModel, maximumSegments=None, useFFT=True, useDCT=True, useEntropy=True):
     Features = namedtuple('Features', ['DCT', 'FFT', 'Entropy'])
-    ImageInfo = namedtuple('ImageInfo', ['Image', 'Segments', 'Features'])
+    ImageInfo = namedtuple('ImageInfo', ['Image', 'SegmentMasks', 'Features'])
 
     img_info_list = []
 
@@ -37,7 +36,7 @@ def GetSegments(imgs, imgMasks, samModel, maximumSegments=None, useFFT=True, use
             total_segments = maximumSegments
         
         for j in range(min(len(masks), total_segments)-1):
-            if j != patch_mask_idx:
+            if j < patch_mask_idx:
                 non_patch_idx = j
             else:
                 non_patch_idx = j+1
@@ -79,16 +78,22 @@ def GetSegments(imgs, imgMasks, samModel, maximumSegments=None, useFFT=True, use
         if useDCT:
             dct_list = np.stack(dct_list, axis=-1)
             dct_list = 255.0 * (dct_list - np.min(dct_list)) / (np.max(dct_list) - np.min(dct_list))
+        else:
+            dct_list = np.array([])
 
         # Normalize the FFT
         if useFFT:
             fft_list = np.stack(fft_list, axis=-1)
             fft_list = 255.0 * (fft_list - np.min(fft_list)) / (np.max(fft_list) - np.min(fft_list))
+        else:
+            fft_list = np.array([])
 
         # Normalize the Entropy
         if useEntropy:
             entropy_list = np.stack(entropy_list, axis=-1)
             entropy_list = 255.0 * (entropy_list - np.min(entropy_list)) / (np.max(entropy_list) - np.min(entropy_list))
+        else:
+            entropy_list = np.array([])
 
         feature_segments = Features(dct_list, fft_list, entropy_list)
         img_info = ImageInfo(imgs[i], masked_img_list, feature_segments)

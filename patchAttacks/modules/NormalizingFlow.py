@@ -1,8 +1,10 @@
+# from anomalib.models.fastflow.lightning_model import Fastflow
+
 def CheckPatch(dct=None, fft=None, entropy=None):
     return False
 
-def GetSingleImagePatch(numSegments, dctFeatures=None, fftFeatures=None, entropyFeatures=None):
-    if entropyFeatures is not None:
+def GetSingleImagePatch(numSegments, dctFeatures, fftFeatures, entropyFeatures):
+    if entropyFeatures.shape[0] != 0:
         for i in range(numSegments):
             is_patch = CheckPatch(dctFeatures[:,:,i], fftFeatures[:,:,i], entropyFeatures[:,:,i])
     else:
