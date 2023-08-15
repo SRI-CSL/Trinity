@@ -169,9 +169,13 @@ def VisualizeBboxes(imgsList, bboxList, labelsList, scoresList=None, labelsMappi
         plt.close()
 
 
-def SaveSingleFeature(folder, imgNumber, feature, featureName):
-    folder_clean = os.path.join(folder, featureName)
-    folder_patch = os.path.join(folder, featureName + "_patch")
+def SaveSingleFeature(folder, imgNumber, feature, featureName, useGrayscale):
+    if useGrayscale:
+        folder_clean = os.path.join(folder, featureName + "_gs")
+        folder_patch = os.path.join(folder, featureName + "_gs_patch")
+    else:
+        folder_clean = os.path.join(folder, featureName + "_3d")
+        folder_patch = os.path.join(folder, featureName + "_3d_patch")
 
     if not os.path.exists(folder_clean):
         os.makedirs(folder_clean)
@@ -181,20 +185,24 @@ def SaveSingleFeature(folder, imgNumber, feature, featureName):
     filename_patch = "{}_{}.png".format(imgNumber, featureName)
 
     for i in range(feature.shape[-1]):
+        if useGrayscale:
+            save_feature = feature[:,:,i]
+        else:
+            save_feature = feature[:,:,:,i]
         if i == feature.shape[-1] - 1:
-            cv2.imwrite(os.path.join(folder_patch, filename_patch), feature[:,:,i])
+            cv2.imwrite(os.path.join(folder_patch, filename_patch), save_feature)
             continue
         filename = "{}_{}_{}.png".format(imgNumber, featureName, i)
-        cv2.imwrite(os.path.join(folder_clean, filename), feature[:,:,i])
+        cv2.imwrite(os.path.join(folder_clean, filename), save_feature)
 
 
-def SaveFeatures(folder, imgNumber, dctList, fftList, entropyList):
+def SaveFeatures(folder, imgNumber, dctList, fftList, entropyList, useGrayscale):
     if dctList.shape[0] != 0:
-        SaveSingleFeature(folder, imgNumber, dctList, "dct")
+        SaveSingleFeature(folder, imgNumber, dctList, "dct", useGrayscale)
     if fftList.shape[0] != 0:
-        SaveSingleFeature(folder, imgNumber, fftList, "fft")
+        SaveSingleFeature(folder, imgNumber, fftList, "fft", useGrayscale)
     if entropyList.shape[0] != 0:
-        SaveSingleFeature(folder, imgNumber, entropyList, "entropy")
+        SaveSingleFeature(folder, imgNumber, entropyList, "entropy", useGrayscale)
 
 
 def GetLabelsFromIndices(labelsFile):

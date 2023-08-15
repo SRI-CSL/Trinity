@@ -7,7 +7,7 @@ from . import FourierSegmentsModule
 from . import EntropySegmentsModule
 
 
-def GetSegments(imgs, imgMasks, samModel, maximumSegments=None, useFFT=True, useDCT=True, useEntropy=True):
+def GetSegments(imgs, imgMasks, samModel, maximumSegments=None, useFFT=True, useDCT=True, useEntropy=True, useGrayscale=True):
     Features = namedtuple('Features', ['DCT', 'FFT', 'Entropy'])
     ImageInfo = namedtuple('ImageInfo', ['Image', 'SegmentMasks', 'Features'])
 
@@ -45,13 +45,13 @@ def GetSegments(imgs, imgMasks, samModel, maximumSegments=None, useFFT=True, use
             mask_3d = np.repeat(current_mask[:, :, np.newaxis], 3, axis=2)
             masked_img = imgs[i] * mask_3d
             if useDCT:
-                dct_segment = CosineSegmentsModule.GetDCTSingleSegment(masked_img)
+                dct_segment = CosineSegmentsModule.GetDCTSingleSegment(masked_img, useGrayscale)
                 dct_list.append(dct_segment)
             if useFFT:
-                fft_segment = FourierSegmentsModule.GetFFTSingleSegment(masked_img)
+                fft_segment = FourierSegmentsModule.GetFFTSingleSegment(masked_img, useGrayscale)
                 fft_list.append(fft_segment)
             if useEntropy:
-                entropy_segment = EntropySegmentsModule.GetEntropySingleSegment(masked_img)
+                entropy_segment = EntropySegmentsModule.GetEntropySingleSegment(masked_img, useGrayscale)
                 entropy_list.append(entropy_segment)
             masked_img_list.append(current_mask)
 
@@ -61,13 +61,13 @@ def GetSegments(imgs, imgMasks, samModel, maximumSegments=None, useFFT=True, use
         masked_img = imgs[i] * mask_3d
 
         if useDCT:
-            dct_segment = CosineSegmentsModule.GetDCTSingleSegment(masked_img)
+            dct_segment = CosineSegmentsModule.GetDCTSingleSegment(masked_img, useGrayscale)
             dct_list.append(dct_segment)
         if useFFT:
-            fft_segment = FourierSegmentsModule.GetFFTSingleSegment(masked_img)
+            fft_segment = FourierSegmentsModule.GetFFTSingleSegment(masked_img, useGrayscale)
             fft_list.append(fft_segment)
         if useEntropy:
-            entropy_segment = EntropySegmentsModule.GetEntropySingleSegment(masked_img)
+            entropy_segment = EntropySegmentsModule.GetEntropySingleSegment(masked_img, useGrayscale)
             entropy_list.append(entropy_segment)
         
         masked_img_list.append(patch_mask)
