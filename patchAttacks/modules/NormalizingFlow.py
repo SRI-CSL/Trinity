@@ -1,5 +1,3 @@
-# from anomalib.models.fastflow.lightning_model import Fastflow
-
 def CheckPatch(dct=None, fft=None, entropy=None):
     return False
 

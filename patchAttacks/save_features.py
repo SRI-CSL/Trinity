@@ -1,10 +1,12 @@
-from . import utils
-from . import FeatureSegments as FS
+import modules.FeatureSegments as FS
+import modules.utils as utils
 
 import yaml
 import ast
+import argparse
+from tqdm import tqdm
 
-def SaveImageFeatures(configPath = 'config.yaml'):
+def SaveImageFeatures(configPath):
     # Read Configurations
     with open(configPath) as f:
         config = yaml.safe_load(f)
@@ -30,9 +32,17 @@ def SaveImageFeatures(configPath = 'config.yaml'):
         # Get Image Segment, DCT, FFT, Entropy, etc features
         img_info_list = FS.GetSegments(imgs=imgs, imgMasks=img_masks, samModel=sam_model, maximumSegments=maximum_segments, useFFT=use_fft, useDCT=use_dct, useEntropy=use_entropy, useGrayscale=use_grayscale)
 
-        for i in range(len(imgs)):
-            # segments = img_info_list[i].SegmentMasks
+        for i in tqdm(range(len(imgs))):
             dct = img_info_list[i].Features.DCT
             fft = img_info_list[i].Features.FFT
             entropy = img_info_list[i].Features.Entropy
             utils.SaveFeatures(feature_save_folder, batch_num * batch_size + i, dct, fft, entropy, use_grayscale)
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Command-line argument example")
+    parser.add_argument("--config", help="config file")
+
+    args = parser.parse_args()
+
+    SaveImageFeatures(args.config)

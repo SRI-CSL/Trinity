@@ -1,0 +1,21 @@
+# Model Based
+model_name: fastflow
+img_shape: (256,256)
+dataset_root: /project/trinity/datasets/apricot_features/dev
+normal_dir: dct_gs
+abnormal_dir: dct_gs_patch
+train_batch_size: 16
+eval_batch_size: 16
+model_backbone: resnet18
+pre_trained_backbone: True
+saved_model_name: fastflow
+saved_model_dir: /project/trinity/pretrained_models/norm_flow/fastflow
+
+# Optimizer Based
+lr: 0.001
+weight_decay: 1e-5
+betas: (0.9, 0.999)
+
+# Training
+max_epochs: 5
+accelerator: gpu

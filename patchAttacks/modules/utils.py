@@ -171,8 +171,8 @@ def VisualizeBboxes(imgsList, bboxList, labelsList, scoresList=None, labelsMappi
 
 def SaveSingleFeature(folder, imgNumber, feature, featureName, useGrayscale):
     if useGrayscale:
-        folder_clean = os.path.join(folder, featureName + "_gs")
-        folder_patch = os.path.join(folder, featureName + "_gs_patch")
+        folder_clean = os.path.join(folder, featureName + "_grayscale")
+        folder_patch = os.path.join(folder, featureName + "_grayscale_patch")
     else:
         folder_clean = os.path.join(folder, featureName + "_3d")
         folder_patch = os.path.join(folder, featureName + "_3d_patch")
