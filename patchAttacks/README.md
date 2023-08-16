@@ -1,4 +1,4 @@
-## Running Instruction
+## Running Instructions
 
 The pipeline is divided into 3 parts - 
 
