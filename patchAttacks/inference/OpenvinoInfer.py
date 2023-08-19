@@ -90,7 +90,8 @@ class OpenVinoInference():
         print("Anomalies Detected (in %): {:.2f}".format(sum(labels) * 100.0 / len(images)))
         
         if print_scores:
-            print("Scores : {}".format(scores))
+            for i in range(len(scores)):
+                print("{} : {}".format(scores[i], labels[i]))
 
         if visualize:
             self.visualizeImages(predictions)

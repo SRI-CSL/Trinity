@@ -1,5 +1,5 @@
 # Model Based
-model_name: fastflow
+model_name: cflow
 img_shape: (256,256)
 dataset_root: /project/trinity/datasets/apricot_features/dev/
 normal_dir: dct_gs
@@ -8,9 +8,9 @@ train_batch_size: 32
 eval_batch_size: 8
 model_backbone: resnet18
 pre_trained_backbone: True
-saved_model_name: fastflow
-saved_model_dir: /project/trinity/pretrained_models/norm_flow/fastflow
-flow_steps: 1
+saved_model_name: cflow
+saved_model_dir: /project/trinity/pretrained_models/norm_flow/cflow
+# flow_steps: 1
 
 # Optimizer Based
 lr: 0.001

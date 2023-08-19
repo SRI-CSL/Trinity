@@ -16,8 +16,7 @@ from anomalib.deploy import OpenVINOInferencer
 from torch.optim import Optimizer
 from torch.optim.adam import Adam
 from torch.utils.data import DataLoader
-from pytorch_lightning import LightningModule, Trainer
-from pytorch_lightning import Trainer
+from pytorch_lightning import LightningModule, Trainer, Callback
 from pytorch_lightning.callbacks import ModelCheckpoint
 
 from anomalib.utils.callbacks import (
@@ -25,20 +24,20 @@ from anomalib.utils.callbacks import (
     PostProcessingConfigurationCallback,
 )
 from anomalib.utils.callbacks.export import ExportCallback, ExportMode
-from anomalib.post_processing import ThresholdMethod
+from anomalib.post_processing import NormalizationMethod, ThresholdMethod
 
 from anomalib.models.fastflow.lightning_model import Fastflow
 from anomalib.models.cflow.lightning_model import Cflow
 
 class AnomalibModel():
-    def __init__(self, configPath):
-        self.config = self.readConfig(configPath)
+    def __init__(self, modelconfigPath):
+        self.config = self.readConfig(modelconfigPath)
         self.image_shape = ast.literal_eval(self.config["img_shape"])
         self.model = None
         self.inference_model = None
 
-    def readConfig(self, configPath):
-        with open(configPath) as f:
+    def readConfig(self, modelconfigPath):
+        with open(modelconfigPath) as f:
             config = yaml.safe_load(f)
         return config
 
@@ -72,6 +71,7 @@ class AnomalibModel():
 
     
     def setupCallbacks(self):
+        # loss_logger = LossLogger()
         callbacks = [
             MetricsConfigurationCallback(
                 task=TaskType.CLASSIFICATION,
@@ -82,6 +82,7 @@ class AnomalibModel():
                 monitor="image_AUROC",
             ),
             PostProcessingConfigurationCallback(
+                # normalization_method=NormalizationMethod.MIN_MAX,
                 threshold_method=ThresholdMethod.ADAPTIVE,
             ),
             ExportCallback(
@@ -90,6 +91,7 @@ class AnomalibModel():
                 filename=self.config["saved_model_name"],
                 export_mode=ExportMode.OPENVINO,
             ),
+            # loss_logger,
         ]
 
         return callbacks
@@ -111,30 +113,43 @@ class AnomalibModel():
         if self.config["model_name"] == "cflow":
             self.model = Cflow(input_size=self.image_shape, backbone=self.config["model_backbone"], pre_trained=self.config["pre_trained_backbone"])
         elif self.config["model_name"] == "fastflow":
-            self.model = Fastflow(input_size=self.image_shape, backbone=self.config["model_backbone"], pre_trained=self.config["pre_trained_backbone"], flow_steps=8)            
+            self.model = Fastflow(input_size=self.image_shape, backbone=self.config["model_backbone"], pre_trained=self.config["pre_trained_backbone"], flow_steps=self.config["flow_steps"])
 
 
     def train(self):
         self.loadModel()
         self.setupOptimizer()
+        self.setupDataModule()
         callbacks = self.setupCallbacks()
 
-        self.setupDataModule()
+        # logger = TensorBoardLogger(save_dir=os.getcwd(), version=1, name="lightning_logs")
+
+        print("Log every steps : {}".format(len(self.folder_datamodule.train_dataloader())))
 
         self.trainer = Trainer(
             callbacks=callbacks,
             accelerator=self.config["accelerator"],
-            devices=1,
+            devices=self.config["devices"],
             max_epochs=self.config["max_epochs"],
-            logger=False,
+            logger=True,
+            # log_every_n_steps=len(self.folder_datamodule.train_dataloader()),
         )
 
         self.trainer.fit(datamodule=self.folder_datamodule, model=self.model)
-        # self.renameModel()
+        # self.trainer.fit(train_dataloaders=self.folder_datamodule.train_dataloader(), val_dataloaders=self.folder_datamodule.val_dataloader(), model=self.model)
 
 
     def test(self):
+        print("Testing")
         test_results = self.trainer.test(model=self.model, datamodule=self.folder_datamodule)
+        # print(type(test_results))
+        return test_results
+    
+    def validate(self):
+        print("Before Validate")
+        res = self.trainer.validate(model=self.model, dataloaders=self.folder_datamodule.val_dataloader())
+        print("After Validate")
+        return res
 
     def loadInferencer(self):
         openvino_model_path = os.path.join(self.config["saved_model_dir"], "weights/openvino", "model.bin")
