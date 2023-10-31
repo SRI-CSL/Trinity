@@ -34,21 +34,26 @@ def LoadImages(folderPath, batchsize=32, numImages=None, shape=None, scale=1.0):
         yield imgs_list
 
 
-def LoadApricotDataset(datasetPath = "/project/trinity/datasets/apricot/pub/apricot-mask/dev/data_mask_v2/", batchsize=32, numImages=None, shape=None, scale=1.0):
+def LoadApricotDataset(datasetPath, batchsize=32, numImages=None, shape=None, scale=0.5):
     images_folder = datasetPath
     images_names = os.listdir(images_folder)
 
     imgs = []
     img_masks = []
+    img_names = []
 
     if numImages is None or numImages > len(images_names):
         numImages = len(images_names)
     for i in range(numImages):
         # idx = random.randint(0,len(gt_images_names)-1)
-        img_info = torch.load(os.path.join(images_folder, images_names[i]))
+        img_path = os.path.join(images_folder, images_names[i])
+        img_name = img_path.split("/")[-1]
+        img_name = img_name.split(".")[0]
+        img_info = torch.load(img_path)
         img = np.squeeze(img_info['Image'])
         img = np.uint8(img * 255.0)
 
+        img_names.append(img_name)
         if shape is None:
             shape = (int(img.shape[1] * scale), int(img.shape[0] * scale))
         img = cv2.resize(img, shape, interpolation = cv2.INTER_AREA)
@@ -60,14 +65,15 @@ def LoadApricotDataset(datasetPath = "/project/trinity/datasets/apricot/pub/apri
         if shape is not None:
             img_mask = cv2.resize(img_mask, shape, interpolation = cv2.INTER_AREA)
         img_masks.append(img_mask)
-
+  
         if len(imgs) == batchsize:
-            yield imgs, img_masks
+            yield imgs, img_masks, img_names
             imgs.clear()
             img_masks.clear()
+            img_names.clear()
 
     if len(imgs) > 0:
-        yield imgs, img_masks
+        yield imgs, img_masks, img_names
 
 
 def compute_vectorized_iou(given_mask, masks):
@@ -81,7 +87,7 @@ def compute_vectorized_iou(given_mask, masks):
     return iou_values
 
 
-def LoadSAMModel(modelPath="/project/trinity/pretrained_models/sam_facebook/sam_vit_h_4b8939.pth", useGPU=True):
+def LoadSAMModel(modelPath, useGPU=True):
     sam = sam_model_registry["vit_h"](checkpoint=modelPath)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -169,7 +175,9 @@ def VisualizeBboxes(imgsList, bboxList, labelsList, scoresList=None, labelsMappi
         plt.close()
 
 
-def SaveSingleFeature(folder, imgNumber, feature, featureName, useGrayscale):
+#TODO : Remove imgNumber
+
+def SaveSingleFeature(folder, imgNumber, feature, featureName, useGrayscale, imageName):
     if useGrayscale:
         folder_clean = os.path.join(folder, featureName + "_grayscale")
         folder_patch = os.path.join(folder, featureName + "_grayscale_patch")
@@ -182,7 +190,7 @@ def SaveSingleFeature(folder, imgNumber, feature, featureName, useGrayscale):
     if not os.path.exists(folder_patch):
         os.makedirs(folder_patch)
     
-    filename_patch = "{}_{}.png".format(imgNumber, featureName)
+    filename_patch = "{}.png".format(imageName)
 
     for i in range(feature.shape[-1]):
         if useGrayscale:
@@ -192,17 +200,17 @@ def SaveSingleFeature(folder, imgNumber, feature, featureName, useGrayscale):
         if i == feature.shape[-1] - 1:
             cv2.imwrite(os.path.join(folder_patch, filename_patch), save_feature)
             continue
-        filename = "{}_{}_{}.png".format(imgNumber, featureName, i)
+        filename = "{}_{}.png".format(imageName, i)
         cv2.imwrite(os.path.join(folder_clean, filename), save_feature)
 
 
-def SaveFeatures(folder, imgNumber, dctList, fftList, entropyList, useGrayscale):
+def SaveFeatures(folder, imgNumber, dctList, fftList, entropyList, useGrayscale, imageName):
     if dctList.shape[0] != 0:
-        SaveSingleFeature(folder, imgNumber, dctList, "dct", useGrayscale)
+        SaveSingleFeature(folder, imgNumber, dctList, "dct", useGrayscale, imageName)
     if fftList.shape[0] != 0:
-        SaveSingleFeature(folder, imgNumber, fftList, "fft", useGrayscale)
+        SaveSingleFeature(folder, imgNumber, fftList, "fft", useGrayscale, imageName)
     if entropyList.shape[0] != 0:
-        SaveSingleFeature(folder, imgNumber, entropyList, "entropy", useGrayscale)
+        SaveSingleFeature(folder, imgNumber, entropyList, "entropy", useGrayscale, imageName)
 
 
 def GetLabelsFromIndices(labelsFile):

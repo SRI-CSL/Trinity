@@ -1,12 +1,12 @@
 # dataset_folder: /project/trinity/datasets/apricot/pub/apricot-mask/dev/data_mask_v2/
-dataset_folder: /project/trinity/datasets/apricot/pub/apricot-mask/data_mask_v2/
+dataset_folder: /home/neelesh/AdversarialAttack/dataset/apricot/dev/
 batch_size: 32
 num_images:
-img_shape: (512,512)
-scale: 1.0
-sam_model_path: /project/trinity/pretrained_models/sam_facebook/sam_vit_h_4b8939.pth
+img_shape: None
+scale: 0.5
+sam_model_path: /home/neelesh/AdversarialAttack/pretrained_models/sam/sam_vit_h_4b8939.pth
 use_gpu: True
-maximum_segments: 40
+maximum_segments: 50
 visualize: True
 normalizing_algo: None
 use_fft: False
@@ -15,4 +15,5 @@ use_entropy: False
 use_grayscale: True
 use_3d: False
 # feature_save_folder: /project/trinity/datasets/apricot_features/dev/
-feature_save_folder: /project/trinity/datasets/apricot_features/test/
+feature_save_folder: /project/trinity/datasets/apricot_features/dev/
+feature_shape: (100,100)

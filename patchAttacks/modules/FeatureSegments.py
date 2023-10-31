@@ -1,5 +1,6 @@
 from collections import namedtuple
 import numpy as np
+import cv2
 
 from . import utils
 from . import CosineSegmentsModule
@@ -7,9 +8,9 @@ from . import FourierSegmentsModule
 from . import EntropySegmentsModule
 
 
-def GetSegments(imgs, imgMasks, samModel, maximumSegments=None, useFFT=True, useDCT=True, useEntropy=True, useGrayscale=True):
+def GetSegments(imgs, imgMasks, samModel, maximumSegments=None, useFFT=True, useDCT=True, useEntropy=True, useGrayscale=True, featureShape=(100,100), imageNames=None):
     Features = namedtuple('Features', ['DCT', 'FFT', 'Entropy'])
-    ImageInfo = namedtuple('ImageInfo', ['Image', 'SegmentMasks', 'Features'])
+    ImageInfo = namedtuple('ImageInfo', ['Image', 'SegmentMasks', 'Features', 'ImageName'])
 
     img_info_list = []
 
@@ -42,8 +43,13 @@ def GetSegments(imgs, imgMasks, samModel, maximumSegments=None, useFFT=True, use
                 non_patch_idx = j+1
 
             current_mask = masks[non_patch_idx]['segmentation']
+            current_bbox = masks[non_patch_idx]['bbox']
+
             mask_3d = np.repeat(current_mask[:, :, np.newaxis], 3, axis=2)
             masked_img = imgs[i] * mask_3d
+            masked_img = masked_img[current_bbox[1]:current_bbox[1]+current_bbox[3], current_bbox[0]:current_bbox[0]+current_bbox[2], :]
+            masked_img = cv2.resize(masked_img, featureShape)
+
             if useDCT:
                 dct_segment = CosineSegmentsModule.GetDCTSingleSegment(masked_img, useGrayscale)
                 dct_list.append(dct_segment)
@@ -57,8 +63,11 @@ def GetSegments(imgs, imgMasks, samModel, maximumSegments=None, useFFT=True, use
 
         # Patch
         patch_mask = masks[patch_mask_idx]['segmentation']
+        current_bbox = masks[patch_mask_idx]['bbox']
         mask_3d = np.repeat(patch_mask[:, :, np.newaxis], 3, axis=2)
         masked_img = imgs[i] * mask_3d
+        masked_img = masked_img[current_bbox[1]:current_bbox[1]+current_bbox[3], current_bbox[0]:current_bbox[0]+current_bbox[2], :]
+        masked_img = cv2.resize(masked_img, featureShape)
 
         if useDCT:
             dct_segment = CosineSegmentsModule.GetDCTSingleSegment(masked_img, useGrayscale)
@@ -96,7 +105,7 @@ def GetSegments(imgs, imgMasks, samModel, maximumSegments=None, useFFT=True, use
             entropy_list = np.array([])
 
         feature_segments = Features(dct_list, fft_list, entropy_list)
-        img_info = ImageInfo(imgs[i], masked_img_list, feature_segments)
+        img_info = ImageInfo(imgs[i], masked_img_list, feature_segments, imageNames[i])
         img_info_list.append(img_info)
 
     return img_info_list
