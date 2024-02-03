@@ -1,0 +1,11 @@
+# dataset_folder: /project/trinity/datasets/apricot/pub/apricot-mask/dev/data_mask_v2/
+train_dataset: /home/neelesh/AdversarialAttack/dataset/apricot_features/test/
+test_dataset: /home/neelesh/AdversarialAttack/dataset/apricot_features/dev/
+batch_size: 64
+save_model_folder: "/home/neelesh/AdversarialAttack/Trinity/patchAttacks/saved_models"
+log_file: "/home/neelesh/AdversarialAttack/Trinity/patchAttack/svm_binary.log"
+
+svm_model: "/home/neelesh/AdversarialAttack/Trinity/patchAttacks/saved_models/"
+
+# contains combined segments (patch + non-patch) in a single folder
+data_dir: "/home/neelesh/AdversarialAttack/dataset/apricot_features/dev_combined/"
