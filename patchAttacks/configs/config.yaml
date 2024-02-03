@@ -1,5 +1,5 @@
 # dataset_folder: /project/trinity/datasets/apricot/pub/apricot-mask/dev/data_mask_v2/
-dataset_folder: /home/neelesh/AdversarialAttack/dataset/apricot/dev/
+dataset_folder: /home/neelesh/AdversarialAttack/dataset/apricot/test/
 batch_size: 32
 num_images:
 img_shape: None
@@ -15,5 +15,5 @@ use_entropy: False
 use_grayscale: True
 use_3d: False
 # feature_save_folder: /project/trinity/datasets/apricot_features/dev/
-feature_save_folder: /project/trinity/datasets/apricot_features/dev/
+feature_save_folder: /home/neelesh/AdversarialAttack/dataset/apricot_features/test/
 feature_shape: (100,100)

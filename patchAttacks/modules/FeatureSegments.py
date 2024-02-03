@@ -44,7 +44,7 @@ def GetSegments(imgs, imgMasks, samModel, maximumSegments=None, useFFT=True, use
 
             current_mask = masks[non_patch_idx]['segmentation']
             current_bbox = masks[non_patch_idx]['bbox']
-
+            current_bbox = list(map(int, current_bbox))
             mask_3d = np.repeat(current_mask[:, :, np.newaxis], 3, axis=2)
             masked_img = imgs[i] * mask_3d
             masked_img = masked_img[current_bbox[1]:current_bbox[1]+current_bbox[3], current_bbox[0]:current_bbox[0]+current_bbox[2], :]
@@ -64,6 +64,7 @@ def GetSegments(imgs, imgMasks, samModel, maximumSegments=None, useFFT=True, use
         # Patch
         patch_mask = masks[patch_mask_idx]['segmentation']
         current_bbox = masks[patch_mask_idx]['bbox']
+        current_bbox = list(map(int, current_bbox))
         mask_3d = np.repeat(patch_mask[:, :, np.newaxis], 3, axis=2)
         masked_img = imgs[i] * mask_3d
         masked_img = masked_img[current_bbox[1]:current_bbox[1]+current_bbox[3], current_bbox[0]:current_bbox[0]+current_bbox[2], :]

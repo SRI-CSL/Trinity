@@ -8,7 +8,9 @@ from collections import namedtuple
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import json
-
+from PIL import Image
+import torch
+from torchvision import transforms
 
 def LoadImages(folderPath, batchsize=32, numImages=None, shape=None, scale=1.0):
     images_names = os.listdir(folderPath)
@@ -250,3 +252,33 @@ def ConvertToNumpyList(tensorList):
         img = (255.0 * np.transpose(tensorList[i].numpy(), (1,2,0))).astype(np.uint8)
         np_list.append(img)
     return np_list
+
+
+def generateSegments(samModel, image):
+    masks = samModel.generate(image)
+    all_masks = []
+    for z, meta_info in enumerate(masks):
+        all_masks.append(meta_info['segmentation'])
+    
+    return all_masks
+
+
+def read_and_convert_to_tensor(file_names):
+    normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+
+    transform = transforms.Compose([
+        transforms.Resize((224, 224)),
+        transforms.ToTensor(),
+        normalize,
+    ])
+
+    images = []
+    
+    for i in range(len(file_names)):
+        file_path = file_names[i]
+        # print(file_path)
+        image = Image.open(file_path).convert('RGB')
+        image_tensor = transform(image)
+        images.append(image_tensor)
+
+    return torch.stack(images)
