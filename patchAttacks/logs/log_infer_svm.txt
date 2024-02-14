@@ -1,0 +1,16 @@
+For SVM Model : svm_2.5.pkl
+True patches detected :  90.57971014492753
+Num Average Patches Detected :  3.3043478260869565
+
+For SVM Model : svm_1.0.pkl
+True patches detected :  92.02898550724638
+Num Average Patches Detected :  3.9927536231884058
+
+For SVM Model : svm_2.0.pkl
+True patches detected :  90.57971014492753
+Num Average Patches Detected :  3.4782608695652173
+
+For SVM Model : svm_1.5.pkl
+True patches detected :  91.30434782608695
+Num Average Patches Detected :  3.7318840579710146
+

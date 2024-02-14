@@ -1,0 +1,53 @@
+Loading Training Set
+Loading Training Features
+Train Features shape :  torch.Size([42529, 4096])
+Train Labels shape :  torch.Size([42529])
+Loading Test Set
+Loading Testing Features
+Test Features shape :  torch.Size([6735, 4096])
+Test Labels shape :  torch.Size([6735])
+All features loaded, training SVMs
+Training ....
+For C :  1.0
+Training Accuracy for Anomalies:  99.42726231386025
+Training Accuracy for Natural Segments:  94.35615517572498
+Test Accuracy for Anomalies:  92.02898550724638
+Test Accuracy for Natural Segments:  93.57283613763832
+--------------------------------------------------------------------------
+Saving Models ....
+Model Saved at /home/neelesh/AdversarialAttack/Trinity/patchAttacks/saved_models/svm_1.0.pkl
+Time taken : 2429.684956550598
+
+Training ....
+For C :  1.5
+Training Accuracy for Anomalies:  99.5418098510882
+Training Accuracy for Natural Segments:  94.90109468023815
+Test Accuracy for Anomalies:  91.30434782608695
+Test Accuracy for Natural Segments:  94.10338032438987
+--------------------------------------------------------------------------
+Saving Models ....
+Model Saved at /home/neelesh/AdversarialAttack/Trinity/patchAttacks/saved_models/svm_1.5.pkl
+Time taken : 1905.715936422348
+
+Training ....
+For C :  2.0
+Training Accuracy for Anomalies:  99.7709049255441
+Training Accuracy for Natural Segments:  95.32600345688496
+Test Accuracy for Anomalies:  90.57971014492753
+Test Accuracy for Natural Segments:  94.61876610580568
+--------------------------------------------------------------------------
+Saving Models ....
+Model Saved at /home/neelesh/AdversarialAttack/Trinity/patchAttacks/saved_models/svm_2.0.pkl
+Time taken : 1765.0245125293732
+
+Training ....
+For C :  2.5
+Training Accuracy for Anomalies:  99.88545246277205
+Training Accuracy for Natural Segments:  95.68129441136931
+Test Accuracy for Anomalies:  90.57971014492753
+Test Accuracy for Natural Segments:  94.98256783386388
+--------------------------------------------------------------------------
+Saving Models ....
+Model Saved at /home/neelesh/AdversarialAttack/Trinity/patchAttacks/saved_models/svm_2.5.pkl
+Time taken : 1638.0308220386505
+
